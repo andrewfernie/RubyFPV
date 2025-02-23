@@ -155,8 +155,31 @@ void _gpio_load_custom_mapping()
    #endif
 
    log_line("[GPIO] Assigned GPIO for QA1/QA2/QA3: %d %d %d", g_iGPIOPinQA1, g_iGPIOPinQA2, g_iGPIOPinQA3);
+
+   if (3 != fscanf(fd, "%d %d %d", &iTmp1, &iTmp2, &iTmp3)) {
+       log_line("[GPIO] Invalid output pin mapping file (%s). Ignoring it.", szFile);
+       fclose(fd);
+       return;
+   }
+   if ((iTmp1 <= 0) || (iTmp2 <= 0) || (iTmp3 <= 0)) {
+       log_line("[GPIO] Invalid output pin (2) mapping file (%s). Ignoring it.", szFile);
+       fclose(fd);
+       return;
+   }
+
+   g_iGPIOPinLedError = iTmp1;
+   g_iGPIOPinLedRecording = iTmp2;
+   g_iGPIOPinBuzzer = iTmp3;
+
+#if defined(HW_PLATFORM_RADXA_ZERO3)
+   g_iGPIOPinLedError = _gpio_reverse_find_pin_mapping(g_iGPIOPinLedError);
+   g_iGPIOPinLedRecording = _gpio_reverse_find_pin_mapping(g_iGPIOPinLedRecording);
+   g_iGPIOPinBuzzer = _gpio_reverse_find_pin_mapping(g_iGPIOPinBuzzer);
+#endif
+
+   log_line("[GPIO] Assigned GPIO for LedError/LEDRecording/Buzzer: %d %d %d", g_iGPIOPinLedError, g_iGPIOPinLedRecording, g_iGPIOPinBuzzer);
    fclose(fd);
-   #endif
+#endif
 }
 
 #ifdef HW_CAPABILITY_GPIO
