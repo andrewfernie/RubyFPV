@@ -114,7 +114,28 @@ int GPIORead(int pin)
 
 int GPIOWrite(int pin, int value)
 {
-   return 0;
+    if (pin <= 0)
+        return 0;
+
+    static const char s_values_str[] = "01";
+
+    char path[64];
+    int fd;
+
+    snprintf(path, 64, "/sys/class/gpio/gpio%d/value", pin);
+    fd = open(path, O_WRONLY);
+    if (-1 == fd) {
+        // fprintf(stderr, "Failed to open gpio value for writing!\n");
+        return (-1);
+    }
+
+    if (1 != write(fd, &s_values_str[LOW == value ? 0 : 1], 1)) {
+        // fprintf(stderr, "Failed to write value!\n");
+        return (-1);
+    }
+
+    close(fd);
+    return 0;
 }
 
 int GPIOGetButtonsPullDirection()
